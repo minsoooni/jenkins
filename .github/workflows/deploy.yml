@@ -1,4 +1,4 @@
-name: Deploy to Ubuntu Server 
+name: Deploy to Ubuntu Server
 on:
   push:
     branches:
@@ -37,10 +37,13 @@ jobs:
           rsync -avz build/libs/*.jar ubuntu@16.170.228.47:~/app/
 
       - name: Run SSH commands
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          ssh ubuntu@16.170.228.47 << 'EOF'
+          ssh ubuntu@16.170.228.47 << EOF
             mkdir -p ~/app
-            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
             pkill -f 'java -jar' || true
             nohup java -jar ~/app/jenkins-0.0.1-SNAPSHOT.jar > ~/log.txt 2>&1 &
             cd ~/app
