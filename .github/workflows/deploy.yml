@@ -38,8 +38,8 @@ jobs:
 
       - name: Run SSH commands
         env:
-          DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_PASS: ${{ secrets.DOCKERHUB_PASSWORD }}
         run: |
           ssh ubuntu@16.170.228.47 << EOF
             mkdir -p ~/app
