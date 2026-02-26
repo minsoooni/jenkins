@@ -36,17 +36,20 @@ jobs:
         run: |
           rsync -avz build/libs/*.jar ubuntu@16.170.228.47:~/app/
 
-      - name: Run SSH commands
+      - name: Run SSH commands          # ← 이 스텝만 교체
         env:
           DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKER_PASS: ${{ secrets.DOCKERHUB_PASSWORD }}
         run: |
-          ssh ubuntu@16.170.228.47 << EOF
-            mkdir -p ~/app
-            echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
-            pkill -f 'java -jar' || true
-            nohup java -jar ~/app/jenkins-0.0.1-SNAPSHOT.jar > ~/log.txt 2>&1 &
-            cd ~/app
-            docker compose pull
-            docker compose up -d
+          ssh ubuntu@16.170.228.47 \
+            DOCKER_USER="$DOCKER_USER" \
+            DOCKER_PASS="$DOCKER_PASS" \
+            bash -s << 'EOF'
+              mkdir -p ~/app
+              echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+              pkill -f 'java -jar' || true
+              nohup java -jar ~/app/jenkins-0.0.1-SNAPSHOT.jar > ~/log.txt 2>&1 &
+              cd ~/app
+              docker compose pull
+              docker compose up -d
           EOF
