@@ -1,26 +1,17 @@
 name: Deploy to Ubuntu Server
+
 on:
   push:
     branches:
       - main
+
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Set gradlew permissions
-        run: chmod +x ./gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew build
 
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.8.0
@@ -32,11 +23,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H 16.170.228.47 >> ~/.ssh/known_hosts
 
-      - name: Deploy to Server with rsync
-        run: |
-          rsync -avz build/libs/*.jar ubuntu@16.170.228.47:~/app/
-
-      - name: Run SSH commands          # ← 이 스텝만 교체
+      - name: Deploy with Docker (Private Repo)
         env:
           DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKER_PASS: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -45,11 +32,8 @@ jobs:
             DOCKER_USER="$DOCKER_USER" \
             DOCKER_PASS="$DOCKER_PASS" \
             bash -s << 'EOF'
-              mkdir -p ~/app
               echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-              pkill -f 'java -jar' || true
-              nohup java -jar ~/app/jenkins-0.0.1-SNAPSHOT.jar > ~/log.txt 2>&1 &
               cd ~/app
               docker compose pull
-              docker compose up -d
+              docker compose up -d --force-recreate
           EOF
