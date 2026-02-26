@@ -38,7 +38,11 @@ jobs:
 
       - name: Run SSH commands
         run: |
-          ssh ubuntu@16.170.228.47 "mkdir -p ~/app"
-          ssh ubuntu@16.170.228.47 "pkill -f 'java -jar' || true"
-          ssh ubuntu@16.170.228.47 "nohup java -jar ~/app/jenkins-0.0.1-SNAPSHOT.jar > ~/log.txt 2>&1 &"
-          ssh ubuntu@16.170.228.47 "cd ~/app && docker compose pull && docker compose up -d"
+          ssh ubuntu@16.170.228.47 << 'EOF'
+            mkdir -p ~/app
+            pkill -f 'java -jar' || true
+            nohup java -jar ~/app/jenkins-0.0.1-SNAPSHOT.jar > ~/log.txt 2>&1 &
+            cd ~/app
+            docker compose pull
+            docker compose up -d
+          EOF
