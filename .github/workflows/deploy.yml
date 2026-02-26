@@ -1,14 +1,11 @@
 name: Deploy to Ubuntu Server
-
 on:
   push:
     branches:
       - main
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,7 +22,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
-      # 🔥 SSH Agent만 사용
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.8.0
         with:
@@ -38,15 +34,8 @@ jobs:
 
       - name: Deploy to Server with rsync
         run: |
-          rsync -avz build/libs/*.jar ubuntu@16.170.228.47:~/app
+          rsync -avz build/libs/*.jar ubuntu@16.170.228.47:~/app/
 
       - name: Run SSH commands
         run: |
-          ssh ubuntu@16.170.228.47 << 'EOF'
-            pkill -f 'java -jar' || true
-            nohup java -jar ~/app/jenkins-0.0.1-SNAPSHOT.jar > log.txt 2>&1 &
-          EOF
-          cd ~/app
-          docker compose pull
-          docker compose up -d
-          EOF
+          ssh ubuntu@16.170.228.47 << 'E
