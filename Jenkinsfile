@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "minsoooni12/spring-jenkins"
+        DOCKER_IMAGE = "kimminsoo12/spring-jenkins"
         SERVER_IP = "16.170.228.47"
         CONTAINER_NAME = "spring-jenkins"
     }
